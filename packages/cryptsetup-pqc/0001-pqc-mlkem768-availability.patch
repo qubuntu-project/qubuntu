@@ -1,0 +1,31 @@
+diff --git a/lib/crypto_backend/crypto_backend.h b/lib/crypto_backend/crypto_backend.h
+index 9c37cf1..05755c5 100644
+--- a/lib/crypto_backend/crypto_backend.h
++++ b/lib/crypto_backend/crypto_backend.h
+@@ -37,6 +37,9 @@ void crypt_backend_destroy(void);
+ #define CRYPT_BACKEND_PBKDF2_INT (1 << 1) /* Iteration in PBKDF2 is signed int and can overflow */
+ #define CRYPT_BACKEND_ARGON2     (1 << 2) /* Backend provides native Argon2 implementation */
+ 
++/* PQC: New ML-KEM-768 availability check (opt-in) */
++int crypt_backend_mlkem768_available(void);
++
+ uint32_t crypt_backend_flags(void);
+ const char *crypt_backend_version(void);
+ const char *crypt_argon2_version(void);
+diff --git a/lib/crypto_backend/crypto_kernel.c b/lib/crypto_backend/crypto_kernel.c
+index 8b96e9e..b3597b1 100644
+--- a/lib/crypto_backend/crypto_kernel.c
++++ b/lib/crypto_backend/crypto_kernel.c
+@@ -103,6 +103,12 @@ static int crypt_kernel_socket_init(struct sockaddr_alg *sa, int *tfmfd, int *op
+ 	return 0;
+ }
+ 
++/* PQC: New ML-KEM-768 function (opt-in, old API unchanged) */
++int crypt_backend_mlkem768_available(void)
++{
++	return access("/proc/crypto", R_OK) == 0;
++}
++
+ int crypt_backend_init(bool fips __attribute__((unused)))
+ {
+ 	struct utsname uts;
